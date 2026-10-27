@@ -1,0 +1,26 @@
+# secrets / runtime state (never commit)
+**/.env
+**/cync_auth.json
+**/telegram_owner.json
+**/picovoice.key
+**/memory.json
+**/reminders.json
+**/logs/
+**/venv/
+**/__pycache__/
+**/*.bak*
+**/*.pyc
+.DS_Store
+blink_auth.json
+faces.json
+models/
+tuya_devices.json
+wake_samples.tgz
+**/wake_samples/
+llm/*.safetensors
+
+# private home data (never commit)
+**/recordings/
+**/cync_mesh.yaml
+**/netguard.json
+backup.log

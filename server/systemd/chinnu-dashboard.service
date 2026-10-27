@@ -1,0 +1,16 @@
+[Unit]
+Description=Chinnu dashboard web (port 8080)
+After=network-online.target
+
+[Service]
+TimeoutStopSec=8
+KillMode=mixed
+Type=simple
+User=dk
+WorkingDirectory=/home/dk/chinnu-agent
+ExecStart=/home/dk/chinnu-agent/venv/bin/uvicorn dashboard:app --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

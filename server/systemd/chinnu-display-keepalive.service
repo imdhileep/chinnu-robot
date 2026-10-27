@@ -1,0 +1,15 @@
+[Unit]
+Description=Keep Chinnu kiosk display on
+After=chinnu-kiosk.service
+Wants=chinnu-kiosk.service
+
+[Service]
+Type=simple
+User=dk
+ExecStartPre=/bin/sleep 20
+ExecStart=/home/dk/chinnu-agent/display_keepalive.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.chinnu.speech</string>
+  <!-- Chinnu speech server (Telugu speech-to-text, Chinnu's own voice). Localhost only; the Chinnu server reaches it via the ssh tunnel. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/dk/chinnu-speech/.venv/bin/uvicorn</string>
+    <string>speech_server:app</string>
+    <string>--host</string><string>127.0.0.1</string>
+    <string>--port</string><string>8091</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/dk/chinnu-speech</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/chinnu-speech.log</string>
+  <key>StandardErrorPath</key><string>/tmp/chinnu-speech.log</string>
+</dict>
+</plist>

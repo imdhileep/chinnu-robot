@@ -1,0 +1,14 @@
+[Unit]
+Description=Chinnu Alexa bridge (fauxmo WeMo emulation)
+After=network-online.target chinnu-dashboard.service
+Wants=network-online.target
+
+[Service]
+User=dk
+WorkingDirectory=/home/dk/chinnu-agent
+ExecStart=/home/dk/chinnu-agent/venv/bin/fauxmo -c /home/dk/.fauxmo/config.json -v
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

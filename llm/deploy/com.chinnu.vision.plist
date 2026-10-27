@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.chinnu.vision</string>
+  <!-- Chinnu vision server (open-vocabulary detection + CLIP). Localhost only; the Chinnu server reaches it via the ssh tunnel. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/dk/chinnu-vision/.venv/bin/uvicorn</string>
+    <string>vision_server:app</string>
+    <string>--host</string><string>127.0.0.1</string>
+    <string>--port</string><string>8092</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/dk/chinnu-vision</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/tmp/chinnu-vision.log</string>
+  <key>StandardErrorPath</key><string>/tmp/chinnu-vision.log</string>
+</dict>
+</plist>

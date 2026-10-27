@@ -1,0 +1,172 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Chinnu VR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0b0f1a;--fg:#e8ecf4;--muted:#8a93a8;--accent:#4cc9f0}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif}
+#wrap{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0}
+#prev{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;object-fit:contain}
+#go{display:block;width:100%;padding:18px;margin:14px 0;font-size:20px;border:0;border-radius:12px;background:var(--accent);color:#000;font-weight:700}
+#go:disabled,#goar:disabled{background:#333;color:#888}
+#goar{display:block;width:100%;padding:18px;margin:14px 0 0;font-size:20px;border:0;border-radius:12px;background:var(--accent);color:#000;font-weight:700}
+ul{color:var(--muted);line-height:1.7;padding-left:20px}
+#st{color:var(--muted);font-size:13px}
+</style></head><body><div id="wrap">
+<h1>&#129405; Chinnu VR</h1>
+<img id="prev" alt="">
+<button id="goar" disabled>Loading...</button>
+<button id="go" disabled style="background:#333;color:#e8ecf4">Enter VR (full)</button>
+<div id="st"></div>
+<ul>
+<li><b>Look around</b> &mdash; Chinnu's head follows your head</li>
+<li><b>Left stick</b> &mdash; walk: up forward, down back, left/right turn</li>
+<li><b>Right stick up</b> &mdash; walk where you are looking (Chinnu turns its body to your look, then walks)</li>
+<li><b>Right stick down</b> &mdash; walk backward</li>
+<li><b>A</b> &mdash; recenter (look straight, press A)</li>
+<li><b>B</b> &mdash; head-follow on / off</li>
+<li><b>Right trigger</b> &mdash; Chinnu wags tail</li>
+<li><b>X</b> (left) &mdash; Chinnu screen size: small / big / hidden</li>
+<li><b>Left trigger (hold)</b> &mdash; talk to Chinnu; the answer plays in your headset</li>
+</ul></div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+const $ = id => document.getElementById(id);
+const P = new URLSearchParams(location.search);
+const YAW_SIGN = P.get('yaw') === '-1' ? -1 : 1, PITCH_SIGN = P.get('pitch') === '-1' ? -1 : 1;
+const st = t => { $('st').textContent = t; hudText = t; drawHud(); };
+const post = u => fetch(u, {method: 'POST'}).then(r => r.json()).catch(() => null);
+
+// camera stream -> canvas texture
+const img = new Image(); img.src = '/camera?' + Date.now();
+$('prev').src = img.src;
+const cv = document.createElement('canvas'); cv.width = 640; cv.height = 360;
+const cx = cv.getContext('2d');
+const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+
+const renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+renderer.xr.enabled = true; renderer.setPixelRatio(window.devicePixelRatio);
+const scene = new THREE.Scene(); const BG = new THREE.Color(0x05070d); scene.background = BG;
+const cam = new THREE.PerspectiveCamera(70, 16 / 9, 0.05, 50); scene.add(cam);
+// head-locked screen = Chinnu's eyes
+const screen = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.8), new THREE.MeshBasicMaterial({map: tex}));
+screen.position.set(0, 0, -2.2); cam.add(screen);
+// small HUD under the screen
+const hc = document.createElement('canvas'); hc.width = 1024; hc.height = 96; const hx = hc.getContext('2d');
+const htex = new THREE.CanvasTexture(hc);
+const hud = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.225), new THREE.MeshBasicMaterial({map: htex, transparent: true}));
+hud.position.set(0, -1.15, -2.2); cam.add(hud);
+let hudText = '';
+function drawHud() { hx.clearRect(0, 0, 1024, 96); hx.fillStyle = 'rgba(0,0,0,.55)'; hx.fillRect(0, 0, 1024, 96);
+  hx.fillStyle = '#e8ecf4'; hx.font = '40px sans-serif'; hx.textAlign = 'center'; hx.fillText(hudText, 512, 62); htex.needsUpdate = true; }
+
+// screen sizes (reality mode starts small so you can see the room)
+const SIZES = [[0.55, -0.35, 'small'], [1, 0, 'big'], [0, 0, 'hidden']]; let sizeI = 1;
+function setSize(i) { sizeI = i; const [k, dy, n] = SIZES[i]; screen.visible = k > 0; if (k) { screen.scale.set(k, k, 1); screen.position.set(0, dy, -2.2); } hud.position.set(0, k ? dy - 0.9 * k - 0.25 : -0.6, -2.2); st('Screen ' + n); }
+function cycleSize() { setSize((sizeI + 1) % SIZES.length); }
+// head tracking
+let follow = true, ref = null, lastSent = {y: 999, p: 999, r: 999}, lastT = 0;
+const e = new THREE.Euler(), q = new THREE.Quaternion(), refInv = new THREE.Quaternion();
+function recenter(xq) { refInv.copy(xq).invert(); ref = true; st('Recentered'); }
+function head(xq, now) {
+  if (!follow || now - lastT < 120) return;
+  if (!ref) recenter(xq);
+  q.copy(refInv).multiply(xq); e.setFromQuaternion(q, 'YXZ');
+  const d = 180 / Math.PI;
+  const y = Math.max(-80, Math.min(80, YAW_SIGN * e.y * d));
+  const p = Math.max(-35, Math.min(25, PITCH_SIGN * e.x * d));
+  const r = Math.max(-30, Math.min(30, -e.z * d));
+  if (Math.abs(y - lastSent.y) < 2 && Math.abs(p - lastSent.p) < 2 && Math.abs(r - lastSent.r) < 3) return;
+  lastSent = {y, p, r}; lastT = now;
+  post(`/api/head?yaw=${y.toFixed(0)}&pitch=${p.toFixed(0)}&roll=${r.toFixed(0)}&speed=100`);
+}
+
+// look-walk: turn body toward head direction using live gyro, shifting the head reference as the body turns
+let gyroPrev = null, gyroBusy = false;
+async function gyroDelta() {
+  if (gyroBusy) return 0; gyroBusy = true;
+  try { const r = await (await fetch('/api/move/last')).json(); const v = -(r.deg ? r.deg[0] : 0);
+    let d = gyroPrev === null || v < gyroPrev - 30 ? 0 : v - gyroPrev; gyroPrev = v; return d; }
+  catch (_) { return 0; } finally { gyroBusy = false; }
+}
+const ry = new THREE.Quaternion(), UP = new THREE.Vector3(0, 1, 0);
+function headYaw(xq) { if (!ref) return 0; q.copy(refInv).multiply(xq); e.setFromQuaternion(q, 'YXZ'); return YAW_SIGN * e.y * 180 / Math.PI; }
+// talk: hold left trigger -> record Quest mic -> /api/glasses/talk -> play reply in headset
+let micStream = null, rec = null, chunks = [], talkHeld = false, talking = false;
+async function initMic() { try { micStream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); } catch (e) { st('Mic blocked - talk disabled'); } }
+function talkStart() {
+  if (!micStream || talking) return; chunks = [];
+  const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+  rec = new MediaRecorder(micStream, mime ? {mimeType: mime} : undefined);
+  rec.ondataavailable = ev => { if (ev.data.size) chunks.push(ev.data); };
+  rec.onstop = sendTalk; rec.start(); st('🎤 Listening... release to send');
+}
+function talkStop() { if (rec && rec.state === 'recording') rec.stop(); }
+async function sendTalk() {
+  const blob = new Blob(chunks, {type: chunks[0] ? chunks[0].type : 'audio/webm'});
+  if (blob.size < 2000) { st('Too short - hold the trigger while you speak'); return; }
+  talking = true; st('Chinnu thinking...');
+  const fd = new FormData(); fd.append('audio', blob, 'q.webm'); fd.append('wake', '0');
+  try {
+    const r = await fetch('/api/glasses/talk', {method: 'POST', body: fd});
+    const dec = h => { try { return decodeURIComponent(r.headers.get(h) || ''); } catch (_) { return ''; } };
+    if (r.status === 200) { const reply = dec('X-Reply'); st(reply ? ('Chinnu: ' + reply).slice(0, 70) : 'Chinnu speaking...');
+      const a = new Audio(URL.createObjectURL(await r.blob())); a.onended = () => { talking = false; }; await a.play(); }
+    else { talking = false; st(r.status === 204 ? 'Did not catch that - try again' : 'Server error ' + r.status); }
+  } catch (e) { talking = false; st('Network error'); }
+}
+// controllers
+let moving = null, moveT = 0, btnPrev = {}, lookWalk = false;
+function pressed(src, i) { const b = src.gamepad && src.gamepad.buttons[i]; return !!(b && b.pressed); }
+function edge(key, now) { const was = btnPrev[key]; btnPrev[key] = now; return now && !was; }
+function controllers(session, xq, t) {
+  let dir = null; lookWalk = false;
+  for (const src of session.inputSources) {
+    if (!src.gamepad) continue;
+    const ax = src.gamepad.axes, x = ax[2] || 0, y = ax[3] || 0;
+    if (src.handedness === 'left') {
+      if (edge('X', pressed(src, 4))) cycleSize();
+      const lt = pressed(src, 0);
+      if (lt && !talkHeld) talkStart(); else if (!lt && talkHeld) talkStop();
+      talkHeld = lt;
+      if (y < -0.5) dir = 'forward'; else if (y > 0.5) dir = 'backward';
+      else if (x < -0.5) dir = 'turn_left'; else if (x > 0.5) dir = 'turn_right';
+    } else if (src.handedness === 'right') {
+      if (y < -0.5) { const hy = headYaw(xq); dir = Math.abs(hy) > 15 ? (hy > 0 ? 'turn_left' : 'turn_right') : 'forward'; lookWalk = true; }
+      else if (y > 0.5) dir = 'backward';
+      if (edge('A', pressed(src, 4))) recenter(xq);
+      if (edge('B', pressed(src, 5))) { follow = !follow; st(follow ? 'Head follow ON' : 'Head follow OFF'); if (!follow) post('/api/head?yaw=0&pitch=0&roll=0'); }
+      if (edge('T', pressed(src, 0))) { post('/api/action/wag_tail'); st('Wag!'); }
+    }
+  }
+  if (dir && dir.startsWith('turn') && lookWalk) gyroDelta().then(d => { if (d) { ry.setFromAxisAngle(UP, -YAW_SIGN * d * Math.PI / 180); refInv.premultiply(ry); } });
+  if (!dir) gyroPrev = null;
+  if (dir) { if (dir !== moving || t - moveT > 300) { post('/api/move/' + dir + '?speed=100'); moveT = t; if (dir !== moving) st('Walking ' + dir.replace('_', ' ')); } moving = dir; }
+  else if (moving) { post('/api/move/stop'); moving = null; st('Stopped'); }
+}
+
+let lastFrame = 0;
+renderer.setAnimationLoop((t, frame) => {
+  if (t - lastFrame > 66 && img.complete && img.naturalWidth) { try { cx.drawImage(img, 0, 0, 640, 360); tex.needsUpdate = true; } catch (_) {} lastFrame = t; }
+  const session = renderer.xr.getSession();
+  if (session) { const xc = renderer.xr.getCamera(); head(xc.quaternion, t); controllers(session, xc.quaternion, t); }
+  renderer.render(scene, cam);
+});
+
+const go = $('go'), goar = $('goar');
+async function start(mode) {
+    const ar = mode === 'immersive-ar';
+    scene.background = ar ? null : BG; setSize(ar ? 0 : 1);
+    const s = await navigator.xr.requestSession(mode, {optionalFeatures: ['local-floor']});
+    renderer.xr.setReferenceSpaceType('local'); await renderer.xr.setSession(s);
+    ref = null; st('Look straight, press A to recenter');
+    s.addEventListener('end', () => { post('/api/move/stop'); post('/api/head?yaw=0&pitch=0&roll=0'); scene.background = BG; st('Exited'); });
+}
+if (!navigator.xr) { goar.textContent = go.textContent = 'Open this page in the Quest browser'; }
+else {
+  navigator.xr.isSessionSupported('immersive-ar').then(ok => { goar.disabled = !ok; goar.textContent = ok ? 'Enter Reality mode' : 'Reality mode not supported'; goar.onclick = () => start('immersive-ar'); });
+  navigator.xr.isSessionSupported('immersive-vr').then(ok => { go.disabled = !ok; go.onclick = () => start('immersive-vr'); });
+}
+st('Ready');
+initMic();
+</script></body></html>

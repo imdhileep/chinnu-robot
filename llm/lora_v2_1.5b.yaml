@@ -1,0 +1,25 @@
+model: models/qwen2.5-1.5b-instruct
+train: true
+data: data/mlx2
+fine_tune_type: lora
+mask_prompt: true
+num_layers: 28
+batch_size: 4
+grad_checkpoint: true
+iters: 1100
+learning_rate: 5.0e-5
+lr_schedule:
+  name: cosine_decay
+  warmup: 30
+  arguments: [5.0e-5, 1100, 1.0e-6]
+lora_parameters:
+  rank: 16
+  dropout: 0.05
+  scale: 10.0
+max_seq_length: 2048
+steps_per_report: 20
+steps_per_eval: 100
+val_batches: 8
+save_every: 250
+adapter_path: adapters/chinnu-1.5b-v2
+seed: 7

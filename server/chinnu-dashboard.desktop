@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Chinnu Dashboard
+Exec=sh -c "sleep 8; chromium --password-store=basic --app=http://127.0.0.1:8080/m --start-maximized --noerrdialogs --disable-infobars --no-first-run --touch-events=enabled --ozone-platform=wayland"
+X-GNOME-Autostart-enabled=true

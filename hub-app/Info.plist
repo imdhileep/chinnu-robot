@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Chinnu Hub</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Lets Chinnu pages use the camera when you ask.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Only you can open the Chinnu Hub.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Talks to the Chinnu server on your home Wi-Fi.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Hold-to-talk sends your voice to Chinnu.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>chart.xyaxis.line</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Status</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>status</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>bell.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Alerts</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>alerts</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>lightbulb.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Lights &amp; plugs</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>home</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>shield.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Guard ON</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>guard</string>
+		</dict>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
+</dict>
+</plist>

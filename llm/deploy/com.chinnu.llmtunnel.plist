@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.chinnu.llmtunnel</string>
+  <!-- Lets the Chinnu server use this Mac's Ollama (fast Chinnu-LLM) at its own 127.0.0.1:11435. Not exposed to the LAN. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/ssh</string>
+    <string>-N</string>
+    <string>-o</string><string>BatchMode=yes</string>
+    <string>-o</string><string>ServerAliveInterval=20</string>
+    <string>-o</string><string>ServerAliveCountMax=3</string>
+    <string>-o</string><string>ExitOnForwardFailure=yes</string>
+    <string>-R</string><string>127.0.0.1:11435:127.0.0.1:11434</string>
+    <string>-R</string><string>127.0.0.1:11436:127.0.0.1:8091</string>
+    <string>-R</string><string>127.0.0.1:11437:127.0.0.1:8092</string>
+    <string>chinnu-server</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>20</integer>
+  <key>StandardErrorPath</key><string>/tmp/chinnu-llmtunnel.log</string>
+</dict>
+</plist>

@@ -1,0 +1,103 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Chinnu Server</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{--bg:#0b0f1a;--card:#141a2a;--fg:#e8ecf4;--muted:#8a93a8;--line:#232b40;--accent:#4cc9f0;--ok:#4ade80;--bad:#ff5a5f;--warn:#fbbf24}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,sans-serif;padding:16px max(16px,env(safe-area-inset-left)) 40px}
+main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{margin:4px 0 0;font-size:24px}h2{margin:0 0 10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.muted{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted);font-weight:600;font-size:12px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--muted)}.ok .dot,.dot.ok{background:var(--ok)}.bad .dot,.dot.bad{background:var(--bad)}
+.num{font-variant-numeric:tabular-nums;text-align:right}.big{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+button{background:#1f2840;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}button:hover{border-color:var(--accent)}button:disabled{opacity:.5}
+select{background:#1f2840;color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:90px;margin-top:10px}.bars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.bars span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
+.scroll{max-height:360px;overflow:auto}.pill{font-size:11px;padding:1px 7px;border-radius:99px;background:#1f2840;color:var(--muted)}
+.sugg li{margin-bottom:8px}a{color:var(--accent)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1f2840;border:1px solid var(--accent);padding:8px 14px;border-radius:10px;display:none}
+</style></head><body><main>
+<div class="top"><div><h1>🐕 Chinnu Server</h1><div class="muted" id="sys">loading…</div></div>
+<div><button onclick="loadAll()">↻ Refresh</button> <a href="/m" class="muted">phone remote</a></div></div>
+
+<div class="grid">
+ <div class="card"><h2>AI models</h2><table id="models"></table></div>
+ <div class="card"><h2>Services · restart</h2><table id="svcs"></table>
+  <div class="muted" style="margin-top:8px">PiDog body restart = about 60 s without hearing or moving.</div>
+  <button style="margin-top:6px" onclick="restart('pidog')">Restart PiDog body</button></div>
+</div>
+
+<div class="grid">
+ <div class="card"><h2>OpenAI usage (Chinnu, estimate)</h2>
+  <div class="big" id="usd">$0.00</div><div class="muted" id="usedetail"></div>
+  <div class="bars" id="bars"></div><div style="height:22px"></div>
+  <div class="muted">Estimated from Chinnu's own calls × list prices. Exact bill: <a href="https://platform.openai.com/usage" target="_blank" rel="noopener">platform.openai.com/usage</a>.
+  Claude plan usage: <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener">claude.ai/settings/usage</a> (the server cannot read it).</div></div>
+ <div class="card"><h2>Today by type</h2><table id="bykind"></table></div>
+</div>
+
+<div class="grid">
+ <div class="card"><h2>Budget guard</h2><div id="budget" class="muted">…</div>
+  <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap"><button onclick="saver('on')">💰 Saver mode on</button><button onclick="saver('off')">Saver mode off</button><button onclick="sendReport()">📨 Send report now</button></div>
+  <div class="muted" style="margin-top:6px">Limits are in config.yaml → ops (daily $2, monthly $30). Warn at 80%, saver mode at 100%.</div></div>
+ <div class="card"><h2>PiDog battery today</h2><svg id="batt" viewBox="0 0 300 110" style="width:100%;height:130px"></svg><div class="muted" id="battnote"></div></div>
+</div>
+
+<div class="card"><div class="top"><h2>Lights &amp; accessories</h2><select id="day" onchange="loadDevices()"></select></div>
+ <table id="devs"></table>
+ <h2 style="margin-top:14px">Timeline</h2><div class="scroll"><table id="events"></table></div></div>
+
+<div class="card"><div class="top"><h2>Chinnu-Hotspot · speed limits</h2><span class="muted" id="wifipw"></span></div>
+ <div class="muted" style="margin-bottom:8px">Devices joined to <b>Chinnu-Hotspot</b> can be limited. 0 = unlimited. Upload is limited to half of download.</div>
+ <table id="wifi"></table></div>
+
+<div class="card"><div class="top"><h2>Devices on your Wi-Fi <span id="netcount" class="pill"></span></h2><button onclick="scanNet()">Scan now</button></div>
+ <div class="muted" style="margin-bottom:8px">Scanned every 5 min. Tap a name to label it. "Today" = minutes seen online today. Phones and watches use private (random) addresses, so the maker is hidden.</div>
+ <div class="scroll"><table id="net"></table></div></div>
+
+<div class="card"><h2>Suggestions to add</h2><ul class="sugg" id="sugg"></ul></div>
+</main><div id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',4000)}
+async function j(u,o){const r=await fetch(u,o);return r.json()}
+async function loadStatus(){const s=await j('/api/srv/status');const y=s.system;
+ $('sys').textContent=`temp ${y.temp} · ${y.uptime} · disk ${y.disk} · HDD ${y.hdd} · RAM ${y.ram} · checked ${s.at}`;
+ $('models').innerHTML=s.models.map(m=>`<tr class="${m.ok?'ok':'bad'}"><td><span class="dot"></span>${esc(m.name)}</td><td class="muted">${esc(m.note)}</td></tr>`).join('');
+ $('svcs').innerHTML=s.services.map(v=>`<tr class="${v.state==='active'?'ok':'bad'}"><td><span class="dot"></span>${esc(v.name)}</td><td class="muted">${esc(v.state)}${v.since?'<br><small>since '+esc(v.since)+'</small>':''}</td><td><button onclick="restart('${v.name}')">Restart</button></td></tr>`).join('')}
+async function restart(n){if(n==='pidog'&&!window._pd){window._pd=1;toast('Tap again to confirm: PiDog body goes quiet ~60 s');setTimeout(()=>window._pd=0,5000);return}
+ toast('Restarting '+n+'…');try{const r=await j('/api/srv/restart/'+n,{method:'POST'});toast((r.ok?'✅ ':'❌ ')+n+': '+(r.note||''));}catch(e){toast('restarting… reload in a few seconds')}
+ setTimeout(loadStatus,4000)}
+async function loadUsage(){const u=await j('/api/srv/usage');const t=u.today;
+ $('usd').textContent='$'+t.usd.toFixed(2)+' today';$('usedetail').textContent=`${t.calls} calls · ${t.realtime_turns} voice turns · ${t.stt_min} min heard · ${t.tts_chars} chars spoken`;
+ const mx=Math.max(0.01,...u.history.map(h=>h.usd));$('bars').innerHTML=u.history.map(h=>`<div style="height:${Math.max(2,h.usd/mx*90)}px" title="${h.day}: $${h.usd.toFixed(2)}"><span>${h.day.slice(5)}</span></div>`).join('');
+ const names={realtime:'Realtime voice',chat:'Brain / vision',stt:'Speech-to-text',tts:'Text-to-speech'};
+ $('bykind').innerHTML='<tr><th>Type</th><th class="num">USD</th></tr>'+Object.entries(t.by_kind).map(([k,v])=>`<tr><td>${names[k]||k}</td><td class="num">$${v.toFixed(3)}</td></tr>`).join('')+
+  '<tr><th>Model</th><th class="num">USD</th></tr>'+Object.entries(t.by_model).map(([k,v])=>`<tr><td>${esc(k)}</td><td class="num">$${v.toFixed(3)}</td></tr>`).join('')}
+async function loadDevices(){const d=$('day').value;const r=await j('/api/srv/devices'+(d?'?day='+d:''));
+ if(!$('day').options.length)$('day').innerHTML=r.days.map(x=>`<option>${x}</option>`).join('');
+ $('devs').innerHTML='<tr><th>Device</th><th class="num">Switches</th><th class="num">On time</th><th>Now</th></tr>'+(r.devices.length?r.devices.map(x=>`<tr><td>${esc(x.device)}</td><td class="num">${x.switches}</td><td class="num">${Math.floor(x.on_minutes/60)}h ${x.on_minutes%60}m</td><td>${x.on_now?'<span class="pill">on</span>':''}</td></tr>`).join(''):'<tr><td class="muted" colspan="4">No device switches logged yet for this day (logging started today).</td></tr>');
+ $('events').innerHTML=r.events.map(e=>`<tr><td class="muted" style="white-space:nowrap">${e.t}</td><td><span class="pill">${esc(e.kind)}</span></td><td>${esc(e.text)}</td><td class="muted">${esc(e.src||'')}</td></tr>`).join('')||'<tr><td class="muted">No events.</td></tr>'}
+async function loadSugg(){const s=await j('/api/srv/suggestions');$('sugg').innerHTML=s.map(x=>`<li><b>${esc(x.title)}</b> — <span class="muted">${esc(x.text)}</span></li>`).join('')}
+async function loadNet(d){const r=d||await j('/api/net/devices');$('netcount').textContent=r.online+' online / '+r.total+' seen · last scan '+(r.last_scan||'-');
+ $('net').innerHTML='<tr><th></th><th>Name</th><th>IP</th><th>Maker</th><th class="num">Today</th><th>Last seen</th></tr>'+r.devices.map(x=>`<tr class="${x.online?'ok':''}"><td><span class="dot"></span></td><td><a href="#" onclick="lbl('${x.mac}','${esc(x.label||x.host||'').replace(/'/g,'')}');return false">${esc(x.label||x.host||x.mac)}</a>${x.label&&x.host?'<br><small class="muted">'+esc(x.host)+'</small>':''}</td><td class="muted">${esc(x.ip)}</td><td class="muted"><small>${esc(x.vendor||'')}</small></td><td class="num">${Math.floor(x.today_min/60)}h ${x.today_min%60}m</td><td class="muted"><small>${esc(x.last_seen||'')}</small></td></tr>`).join('')}
+async function scanNet(){toast('Scanning…');loadNet(await j('/api/net/scan',{method:'POST'}));toast('Scan done')}
+async function lbl(mac,cur){const box=document.createElement('div');box.innerHTML=`<div style="position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center"><div class="card" style="min-width:280px"><h2>Name this device</h2><input id="lblin" value="${cur}" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--line);background:#1f2840;color:var(--fg)"><div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end"><button id="lblc">Cancel</button><button id="lbls">Save</button></div></div></div>`;document.body.appendChild(box);
+ box.querySelector('#lblc').onclick=()=>box.remove();box.querySelector('#lbls').onclick=async()=>{await j('/api/net/label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mac,label:box.querySelector('#lblin').value})});box.remove();loadNet()}}
+async function loadWifi(){const r=await j('/api/wifi/clients');$('wifipw').innerHTML='password: <b>'+esc(r.password)+'</b>';
+ $('wifi').innerHTML='<tr><th></th><th>Device</th><th>IP</th><th>Limit (Mbps)</th><th></th></tr>'+(r.devices.length?r.devices.map(x=>`<tr class="${x.online?'ok':''}"><td><span class="dot"></span></td><td>${esc(x.label||x.mac)}</td><td class="muted">${esc(x.ip||'offline')}</td><td><input type="number" min="0" step="1" value="${x.down||0}" id="lim_${x.mac.replace(/:/g,'')}" style="width:80px;padding:5px;border-radius:8px;border:1px solid var(--line);background:#1f2840;color:var(--fg)"></td><td><button onclick="setLim('${x.mac}')">Set</button></td></tr>`).join(''):'<tr><td class="muted">No devices on Chinnu-Hotspot yet. Join it from a phone/tablet with the password above.</td></tr>')}
+async function setLim(mac){const v=parseFloat($('lim_'+mac.replace(/:/g,'')).value)||0;await j('/api/wifi/limit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mac,down:v,up:v/2})});toast(v?('Limited to '+v+' Mbps'):'Unlimited');loadWifi()}
+async function loadBudget(){const b=await j('/api/ops/budget');$('budget').innerHTML=`Today <b>$${b.today.toFixed(2)}</b> / $${b.limits.daily_usd} · Month <b>$${b.month.toFixed(2)}</b> / $${b.limits.monthly_usd}<br>Saver mode: <b style="color:${b.saver?'var(--warn)':'var(--ok)'}">${b.saver?'ON':'off'}</b>`}
+async function saver(a){await j('/api/ops/saver/'+a,{method:'POST'});toast('Saver mode '+a);loadBudget()}
+async function sendReport(){const r=await j('/api/ops/report?send=1');toast('Report sent to Telegram')}
+async function loadBatt(){const s=(await j('/api/ops/battery')).filter(x=>x.pct!=null);const g=$('batt');if(!s.length){g.innerHTML='<text x="10" y="55" fill="currentColor" font-size="10" opacity=".6">Logging every 10 min - first points soon</text>';return}
+ const toX=t=>{const[h,m]=t.split(':').map(Number);return 20+(h*60+m)/1440*270},toY=p=>100-p*0.9;
+ let grid='';for(const p of[0,50,100])grid+=`<line x1="20" x2="290" y1="${toY(p)}" y2="${toY(p)}" stroke="currentColor" opacity=".15"/><text x="0" y="${toY(p)+3}" font-size="8" fill="currentColor" opacity=".6">${p}%</text>`;
+ for(const h of[0,6,12,18,24])grid+=`<text x="${20+h/24*270-6}" y="110" font-size="8" fill="currentColor" opacity=".6">${h}:00</text>`;
+ const pts=s.map(x=>toX(x.t)+','+toY(x.pct)).join(' ');const ch=s.filter(x=>x.charging).map(x=>`<circle cx="${toX(x.t)}" cy="${toY(x.pct)}" r="1.6" fill="#fbbf24"/>`).join('');
+ g.innerHTML=grid+`<polyline points="${pts}" fill="none" stroke="#4cc9f0" stroke-width="1.6"/>`+ch;$('battnote').textContent=`now ${s[s.length-1].pct}% (${s[s.length-1].v} V) · yellow dots = charger on`}
+function loadAll(){loadBudget();loadBatt();loadWifi();loadStatus();loadUsage();loadDevices();loadSugg();loadNet()}
+loadAll();setInterval(loadUsage,60000);
+</script></body></html>

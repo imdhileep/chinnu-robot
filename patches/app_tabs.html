@@ -1,0 +1,24 @@
+<section class="tab" id="t-server">
+ <div class="card"><div style="display:flex;align-items:center;gap:12px"><div id="upbig" style="font-size:34px;font-weight:800">–</div><div style="flex:1"><div style="font-weight:600">features running</div><div id="upsub" style="font-size:12px;color:var(--muted)">checking…</div></div><button style="flex:0 0 auto;padding:10px 14px;font-size:14px" id="chkb" onclick="appCheck()">&#8635; Check now</button></div></div>
+ <div class="card"><h3>Modes</h3><div id="modes"></div></div>
+ <div class="card"><h3>PiDog battery (today) <span id="batnow" style="float:right;text-transform:none;letter-spacing:0"></span></h3><div id="batchart" style="height:70px"></div></div>
+ <div id="feats"></div>
+ <div class="card"><h3>OpenAI spend</h3><div class="kv" id="spend"></div></div>
+ <div class="card"><h3>Server</h3><div class="kv" id="srv"></div></div>
+ <div class="card"><h3>Apps &amp; pages</h3>
+  <div class="row"><button onclick="location.href='https://chinnu-server.your-tailnet.ts.net'">&#9729; Nextcloud</button><button onclick="location.href='https://chinnu-server.your-tailnet.ts.net:8443'">&#127916; Jellyfin</button></div>
+  <div class="row"><button onclick="location.href='/server'">&#128202; Full server page</button><button onclick="location.href='/history'">&#128214; History</button></div>
+  <div class="row"><button onclick="location.href='/videos'">&#128252; Gallery</button><button onclick="location.href='/settings'">&#9881; Settings</button><button onclick="location.href='/'">Desk view</button></div></div>
+</section>
+<section class="tab" id="t-alerts">
+ <div class="card"><h3>Guard mode</h3><div id="guardbox" style="font-size:14px;color:var(--muted);margin-bottom:8px">…</div>
+  <div class="row"><button onclick="modeSet('guard','on')">&#128737; Guard ON</button><button onclick="modeSet('guard','off')">Guard OFF</button></div></div>
+ <div class="card"><h3>Home cameras</h3><div id="blinkst" style="font-size:13px;color:var(--muted);margin-bottom:8px">…</div>
+  <div class="row"><button onclick="blink2('main door')">&#128682; Main door</button><button onclick="blink2('patio')">&#127795; Patio</button></div>
+  <div id="blinkbox2" style="display:none;margin-top:8px"><img id="blinkimg2" style="width:100%;border-radius:12px"><div id="blinkmsg2" style="font-size:12px;color:var(--muted);margin-top:4px"></div></div></div>
+ <div class="card"><h3>Reports</h3>
+  <div class="row"><button onclick="rep('brief')">&#9728; Morning briefing</button><button onclick="rep('night')">&#127769; Night report</button><button onclick="rep('diary')">&#129504; Diary</button></div>
+  <div id="reptxt" style="white-space:pre-wrap;font-size:14px;line-height:1.4;display:none;margin-top:6px"></div>
+  <div class="row" id="repsend" style="display:none;margin-top:8px"><button onclick="repSend()">&#128228; Send to Telegram</button></div></div>
+ <div class="card"><h3>Alerts &amp; events <select id="adays" style="float:right" onchange="alerts()"><option value="1">today</option><option value="3" selected>3 days</option><option value="7">7 days</option></select></h3><div id="alist" style="font-size:14px"></div></div>
+</section>

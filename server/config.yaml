@@ -1,0 +1,94 @@
+robot:
+  url: http://192.168.1.208:8090
+  timeout: 20
+brain:
+  provider: gpt
+  model: gpt-4.1
+  script: roman
+  language: telugu
+voice:
+  tts_model: gpt-4o-mini-tts
+  voice: echo
+  child_voice: true
+  child_pitch: 600.0
+  stt_model: gpt-4o-transcribe
+  stt_language: te
+  listen_seconds: 8.0
+  followup_seconds: 5.0
+  script: telugu
+  silence_rms: 4.5
+  summary_at: '22:00'
+  realtime: true        # OpenAI Realtime speech-to-speech (fast); false = STT -> GPT -> TTS
+  realtime_model: gpt-realtime
+  realtime_voice: marin
+  ack: chime
+  quick_ack: true     # say 'Sare anna!' instantly when a command tool runs
+  stream: true
+idle:
+  enabled: true
+  min_gap: 90.0
+  max_gap: 240.0
+  quiet: 03:00-07:00
+  greet: true
+  greet_cooldown: 600
+  greet_unknown: false
+  face_interval: 20
+  track: true
+  track_hz: 3
+  track_yaw_sign: -1
+  track_pitch_sign: 1
+
+strip:                 # Tuya/GHome PM03 power strip (tinytuya, local)
+  outlets:
+    1: outlet 1 (empty)
+    2: stand main light
+    3: desktop powerbox (PC - confirm with Chintu before switching OFF)
+    usb: usb ports (stand strip lights + table clock)
+
+govee:                 # Govee dual smart plugs (cloud API)
+  sockets:
+    Misev:
+      1: chinnu server
+      2: pidog charger
+    Spectrum WiFi:
+      1: modem
+      2: router
+    TV:
+      1: google tv
+      2: tv screen
+    Dual Smart Plug:
+      1: wireless charger
+      2: empty
+  locked: [chinnu server, modem, router]     # never switched OFF by Chinnu
+  groups:
+    tv: [google tv, tv screen]
+    chargers: [pidog charger, wireless charger]
+
+local_llm:             # Ollama on this server - fallback brain when OpenAI fails
+  url: http://127.0.0.1:11434
+  model: qwen2.5:3b
+
+autocharge:            # Govee 'pidog charger' socket switched by battery voltage (autocharge.py)
+  enabled: true
+  low_v: 7.3           # charger ON below this (~39%)
+  full_v: 8.3          # charger OFF at/above this on 2 readings in a row (~94%)
+  max_hours: 5         # safety: never charge longer than this
+  offline_min: 6       # robot unreachable this long -> charger ON (flat battery)
+  every_s: 120
+
+ops:                   # ops.py: budget guard, nightly report, auto-heal
+  daily_usd: 2.0       # OpenAI estimate per day -> warn at 80%, saver mode at 100%
+  monthly_usd: 30.0
+  report_at: "22:00"   # nightly Telegram report
+  heal: true           # auto-restart failed services / containers (max 3 per hour each)
+
+home_auto:             # home_auto.py
+  owner_macs: ["86:b0:86:30:53:99"]    # Chintu's phone Wi-Fi MAC(s) -> auto home/away
+  away_min: 10         # phone off Wi-Fi this long -> "leaving home"
+  quiet_start: "23:00" # quiet hours: no proactive talking, low volume
+  quiet_end: "07:00"
+  quiet_volume: 20
+  day_volume: 30
+  briefing_at: "07:00" # morning briefing on Telegram
+  diary_at: "22:05"    # Chinnu diary on Telegram
+  door_alerts: true    # Blink motion -> Telegram photo + "door daggara evaro unnaru"

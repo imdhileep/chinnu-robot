@@ -1,0 +1,20 @@
+[Unit]
+Description=Chinnu Controller (PiDog action API)
+After=network-online.target
+Wants=network-online.target
+Conflicts=pidog-ai.service pidog_app.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/dk/chinnu-controller
+EnvironmentFile=/etc/chinnu-controller.env
+Environment=HOME=/home/dk
+Environment=PYTHONUNBUFFERED=1
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/python3 -m uvicorn controller:app --host 0.0.0.0 --port 8090
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

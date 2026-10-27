@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.chinnu.visiontrain</string>
+  <!-- Nightly 2:30 AM: train Chinnu's custom fast object model from the photos it collected, then deploy it to the server. -->
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/dk/chinnu-vision/.venv/bin/python</string>
+    <string>/Users/dk/chinnu-vision/nightly_train.py</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/dk/chinnu-vision</string>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>30</integer></dict>
+  <key>StandardOutPath</key><string>/tmp/chinnu-vision-train.log</string>
+  <key>StandardErrorPath</key><string>/tmp/chinnu-vision-train.log</string>
+</dict>
+</plist>

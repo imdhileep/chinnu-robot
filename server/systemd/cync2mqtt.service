@@ -1,0 +1,16 @@
+[Unit]
+Description=Cync BLE mesh to MQTT bridge (cync2mqtt)
+After=bluetooth.target mosquitto.service network-online.target
+Wants=bluetooth.target mosquitto.service
+
+[Service]
+Type=simple
+User=dk
+ExecStartPre=/bin/sleep 5
+ExecStart=/home/dk/venv-cync/bin/cync2mqtt /home/dk/cync_mesh.yaml
+Restart=always
+RestartSec=10
+TimeoutStopSec=8
+
+[Install]
+WantedBy=multi-user.target

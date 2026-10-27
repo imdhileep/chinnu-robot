@@ -1,0 +1,6 @@
+FROM ./models/chinnu-3b-fused
+TEMPLATE """{{ .Prompt }}"""
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER temperature 0.4
+PARAMETER num_ctx 2048

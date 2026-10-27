@@ -1,0 +1,92 @@
+{
+ "FAUXMO": {
+  "ip_address": "192.168.1.226"
+ },
+ "PLUGINS": {
+  "SimpleHTTPPlugin": {
+   "DEVICES": [
+    {
+     "name": "Puppy",
+     "port": 12340,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/action/stand",
+     "off_cmd": "http://127.0.0.1:8080/api/action/lie",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Puppy sit",
+     "port": 12341,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/action/sit",
+     "off_cmd": "http://127.0.0.1:8080/api/action/stand",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Fan light",
+     "port": 12342,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/light/room/on",
+     "off_cmd": "http://127.0.0.1:8080/api/light/room/off",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Desk lamp",
+     "port": 12343,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/light/desk/on",
+     "off_cmd": "http://127.0.0.1:8080/api/light/desk/off",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Morning light",
+     "port": 12344,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/cmd/morning%20light",
+     "off_cmd": "http://127.0.0.1:8080/api/light/room/off",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Mood light",
+     "port": 12345,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/cmd/mood%20light",
+     "off_cmd": "http://127.0.0.1:8080/api/light/room/off",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Movie mode",
+     "port": 12346,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/cmd/movie%20mode",
+     "off_cmd": "http://127.0.0.1:8080/api/cmd/work%20mode",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Puppy camera",
+     "port": 12347,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/record/start",
+     "off_cmd": "http://127.0.0.1:8080/api/record/stop",
+     "use_fake_state": true,
+     "initial_state": "off"
+    },
+    {
+     "name": "Puppy mute",
+     "port": 12348,
+     "method": "POST",
+     "on_cmd": "http://127.0.0.1:8080/api/volume?mute=on",
+     "off_cmd": "http://127.0.0.1:8080/api/volume?mute=off",
+     "use_fake_state": true,
+     "initial_state": "off"
+    }
+   ]
+  }
+ }
+}

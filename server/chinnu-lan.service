@@ -1,0 +1,17 @@
+[Unit]
+Description=Chinnu remote on home LAN (https 8444, MAC allow-list) for Quest 3
+After=network-online.target chinnu-dashboard.service
+
+[Service]
+TimeoutStopSec=8
+KillMode=mixed
+Type=simple
+User=dk
+WorkingDirectory=/home/dk/chinnu-agent
+Environment=CHINNU_LAN=1
+ExecStart=/home/dk/chinnu-agent/venv/bin/uvicorn dashboard:app --host 0.0.0.0 --port 8444 --ssl-keyfile /home/dk/chinnu-agent/lan_key.pem --ssl-certfile /home/dk/chinnu-agent/lan_cert.pem
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

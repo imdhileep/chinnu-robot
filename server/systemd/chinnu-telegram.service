@@ -1,0 +1,14 @@
+[Unit]
+Description=Chinnu Telegram bot (alerts + remote commands)
+After=network-online.target chinnu-dashboard.service
+Wants=network-online.target
+
+[Service]
+User=dk
+WorkingDirectory=/home/dk/chinnu-agent
+ExecStart=/home/dk/chinnu-agent/venv/bin/python -u telegram_bot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

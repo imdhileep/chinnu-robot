@@ -1,0 +1,51 @@
+name: ChinnuHub
+options:
+  bundleIdPrefix: com.dhileep
+  deploymentTarget:
+    iOS: "17.2"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: "YOUR_TEAM_ID"
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  ChinnuHub:
+    type: application
+    platform: iOS
+    sources: [Sources, Assets.xcassets]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dhileep.chinnuhub
+        PRODUCT_NAME: ChinnuHub
+        INFOPLIST_FILE: Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Chinnu Hub
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        NSMicrophoneUsageDescription: Hold-to-talk sends your voice to Chinnu.
+        NSCameraUsageDescription: Lets Chinnu pages use the camera when you ask.
+        NSFaceIDUsageDescription: Only you can open the Chinnu Hub.
+        NSLocalNetworkUsageDescription: Talks to the Chinnu server on your home Wi-Fi.
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: status
+            UIApplicationShortcutItemTitle: Status
+            UIApplicationShortcutItemIconSymbolName: chart.xyaxis.line
+          - UIApplicationShortcutItemType: alerts
+            UIApplicationShortcutItemTitle: Alerts
+            UIApplicationShortcutItemIconSymbolName: bell.fill
+          - UIApplicationShortcutItemType: home
+            UIApplicationShortcutItemTitle: Lights & plugs
+            UIApplicationShortcutItemIconSymbolName: lightbulb.fill
+          - UIApplicationShortcutItemType: guard
+            UIApplicationShortcutItemTitle: Guard ON
+            UIApplicationShortcutItemIconSymbolName: shield.fill
